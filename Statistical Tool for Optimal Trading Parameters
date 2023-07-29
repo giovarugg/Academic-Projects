@@ -1,0 +1,46 @@
+''' The "Statistical Tool for Optimal Trading Parameters" allows you to determine the Stop Loss and the Take Profit of any tradable asset based on its Average True Range (ATR) '''
+
+import pandas as pd
+import yfinance as yf
+import numpy as np
+from tabulate import tabulate
+
+# Define a function to compute stop loss and soft target
+def parameters(ticker, interv, order):
+    data = yf.download(ticker, start='2018-01-01', interval= interv)
+
+    # Calculate the True Range
+    data['range'] = data['High'] - data['Low']
+    data['High-PrevClose'] = abs(data['High'] - data['Close'].shift())
+    data['Low-PrevClose'] = abs(data['Low'] - data['Close'].shift())
+    data['TR'] = data[['range', 'High-PrevClose', 'Low-PrevClose']].max(axis=1)
+
+    # Calculate and displaying the ATR
+    n = 14  # the number of periods to include in the ATR calculation
+    data['ATR'] = data['TR'].rolling(n).mean()  
+    today_atr = data['ATR'].iloc[-1]
+
+
+    if order == 'market':
+        data_obj = yf.download(ticker, interval= '1m')
+        price = data_obj['Close'][0]
+        print(price)
+
+    if order == 'limit':
+        price = float(input('Please insert your limit price: '))
+
+
+    sl_long = price - today_atr  # Calculating Stop Loss for a long position at 1 ATR
+    st_long = price + 3 * today_atr  # Calculating Soft Target for a long position at 3 ATR
+    sl_short = price + today_atr  # Calculating Stop Loss for a Short position at 1 ATR
+    st_short = price - 3 * today_atr  # Calculating Soft Target for a Short position at 3 ATR
+
+    tab = [
+        [ticker, 'Stop Loss', 'Soft Target'],
+        ['Long Position', format(sl_long, '.5f'), format(st_long, '.5f')],
+        ['Short Position', format(sl_short, '.5f'), format(st_short, '.5f')]
+    ]
+    print(tabulate(tab, tablefmt='fancy_grid', stralign='center', numalign='center'))
+
+# Call the function with example parameters
+parameters('EURUSD=X', '1d', 'limit')
