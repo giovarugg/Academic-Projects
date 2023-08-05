@@ -1,4 +1,4 @@
-''' The "Statistical Tool for Optimal Trading Parameters" allows you to determine the Stop Loss and the Take Profit of any tradable asset based on its Average True Range (ATR) '''
+"""The "Statistical Tool for Optimal Trading Parameters" allows you to determine the Stop Loss and the Take Profit of any tradable asset based on its Average True Range (ATR)."""
 
 import pandas as pd
 import yfinance as yf
@@ -7,7 +7,7 @@ from tabulate import tabulate
 
 # Define a function to compute stop loss and soft target
 def parameters(ticker, interv, order):
-    data = yf.download(ticker, start='2018-01-01', interval= interv)
+    data = yf.download(ticker, start='2018-01-01', interval=interv)
 
     # Calculate the True Range
     data['range'] = data['High'] - data['Low']
